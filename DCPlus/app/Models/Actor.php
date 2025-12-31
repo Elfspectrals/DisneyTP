@@ -24,11 +24,11 @@ class Actor extends Model
 
     public function movies(): BelongsToMany
     {
-        return $this->belongsToMany(Movie::class);
+        return $this->belongsToMany(Movie::class, 'movie_actor');
     }
 
     public function series(): BelongsToMany
     {
-        return $this->belongsToMany(Series::class);
+        return $this->belongsToMany(Series::class, 'series_actor');
     }
 }

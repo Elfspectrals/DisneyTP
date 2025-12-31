@@ -32,12 +32,22 @@
                             </a>
                             @auth
                             @if(auth()->user()->profiles()->exists())
+                            @if($isInWatchlist)
+                            <form action="{{ route('watchlist.remove', ['type' => $content instanceof \App\Models\Movie ? 'movie' : 'series', 'id' => $content->id]) }}" method="POST" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="px-6 py-3 bg-red-600/80 backdrop-blur-sm border border-red-500/50 text-white font-semibold rounded hover:bg-red-600 transition">
+                                    ✗ Retirer de ma liste
+                                </button>
+                            </form>
+                            @else
                             <form action="{{ route('watchlist.add', ['type' => $content instanceof \App\Models\Movie ? 'movie' : 'series', 'id' => $content->id]) }}" method="POST" class="inline">
                                 @csrf
                                 <button type="submit" class="px-6 py-3 bg-white/20 backdrop-blur-sm border border-white/30 text-white font-semibold rounded hover:bg-white/30 transition">
-                                    {{ $isInWatchlist ? '✓ Dans ma liste' : '+ Ma liste' }}
+                                    + Ma liste
                                 </button>
                             </form>
+                            @endif
                             @endif
                             @endauth
                         </div>

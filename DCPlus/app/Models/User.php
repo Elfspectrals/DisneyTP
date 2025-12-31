@@ -52,4 +52,22 @@ class User extends Authenticatable
     {
         return $this->hasMany(Profile::class);
     }
+
+    /**
+     * Get the current active profile from session
+     */
+    public function currentProfile(): ?Profile
+    {
+        $profileId = session('current_profile_id');
+        
+        if ($profileId) {
+            $profile = $this->profiles()->where('id', $profileId)->first();
+            if ($profile) {
+                return $profile;
+            }
+        }
+        
+        // Fallback to first profile if no current profile in session
+        return $this->profiles()->first();
+    }
 }

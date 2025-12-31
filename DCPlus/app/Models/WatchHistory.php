@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class WatchHistory extends Model
 {
+    protected $table = 'watch_history';
+    
     protected $fillable = [
         'profile_id',
         'watchable_type',

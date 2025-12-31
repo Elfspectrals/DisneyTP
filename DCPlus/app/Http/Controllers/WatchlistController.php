@@ -12,7 +12,7 @@ class WatchlistController extends Controller
 {
     public function index()
     {
-        $profile = Auth::user()->profiles()->first();
+        $profile = Auth::user()->currentProfile();
         
         if (!$profile) {
             return redirect()->route('profiles.create')
@@ -29,7 +29,7 @@ class WatchlistController extends Controller
     
     public function add($type, $id)
     {
-        $profile = Auth::user()->profiles()->first();
+        $profile = Auth::user()->currentProfile();
         
         if (!$profile) {
             return back()->with('error', 'Please create a profile first.');
@@ -48,7 +48,11 @@ class WatchlistController extends Controller
     
     public function remove($type, $id)
     {
-        $profile = Auth::user()->profiles()->first();
+        $profile = Auth::user()->currentProfile();
+        
+        if (!$profile) {
+            return back()->with('error', 'Please select a profile first.');
+        }
         
         $model = $type === 'movie' ? Movie::findOrFail($id) : Series::findOrFail($id);
         

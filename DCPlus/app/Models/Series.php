@@ -34,17 +34,17 @@ class Series extends Model
 
     public function genres(): BelongsToMany
     {
-        return $this->belongsToMany(Genre::class);
+        return $this->belongsToMany(Genre::class, 'series_genre');
     }
 
     public function actors(): BelongsToMany
     {
-        return $this->belongsToMany(Actor::class);
+        return $this->belongsToMany(Actor::class, 'series_actor');
     }
 
     public function directors(): BelongsToMany
     {
-        return $this->belongsToMany(Director::class);
+        return $this->belongsToMany(Director::class, 'series_director');
     }
 
     public function episodes(): HasMany

@@ -29,22 +29,24 @@ class ContentController extends Controller
         $userRating = null;
         
         if (Auth::check() && Auth::user()->profiles()->exists()) {
-            $profile = Auth::user()->profiles()->first();
+            $profile = Auth::user()->currentProfile();
             
-            $isInWatchlist = Watchlist::where('profile_id', $profile->id)
-                ->where('watchable_type', get_class($content))
-                ->where('watchable_id', $content->id)
-                ->exists();
-                
-            $watchProgress = WatchHistory::where('profile_id', $profile->id)
-                ->where('watchable_type', get_class($content))
-                ->where('watchable_id', $content->id)
-                ->first();
-                
-            $userRating = Rating::where('profile_id', $profile->id)
-                ->where('rateable_type', get_class($content))
-                ->where('rateable_id', $content->id)
-                ->first();
+            if ($profile) {
+                $isInWatchlist = Watchlist::where('profile_id', $profile->id)
+                    ->where('watchable_type', get_class($content))
+                    ->where('watchable_id', $content->id)
+                    ->exists();
+                    
+                $watchProgress = WatchHistory::where('profile_id', $profile->id)
+                    ->where('watchable_type', get_class($content))
+                    ->where('watchable_id', $content->id)
+                    ->first();
+                    
+                $userRating = Rating::where('profile_id', $profile->id)
+                    ->where('rateable_type', get_class($content))
+                    ->where('rateable_id', $content->id)
+                    ->first();
+            }
         }
         
         return view('content.show', compact('content', 'isInWatchlist', 'watchProgress', 'userRating'));
@@ -64,7 +66,11 @@ class ContentController extends Controller
             abort(404);
         }
         
-        $profile = Auth::user()->profiles()->first();
+        $profile = Auth::user()->currentProfile();
+        
+        if (!$profile) {
+            return back()->with('error', 'Please select a profile first.');
+        }
         
         Rating::updateOrCreate(
             [
@@ -101,7 +107,11 @@ class ContentController extends Controller
             abort(404);
         }
         
-        $profile = Auth::user()->profiles()->first();
+        $profile = Auth::user()->currentProfile();
+        
+        if (!$profile) {
+            return back()->with('error', 'Please select a profile first.');
+        }
         
         Review::updateOrCreate(
             [
@@ -132,7 +142,11 @@ class ContentController extends Controller
             abort(404);
         }
         
-        $profile = Auth::user()->profiles()->first();
+        $profile = Auth::user()->currentProfile();
+        
+        if (!$profile) {
+            return response()->json(['error' => 'Please select a profile first.'], 400);
+        }
         
         WatchHistory::updateOrCreate(
             [

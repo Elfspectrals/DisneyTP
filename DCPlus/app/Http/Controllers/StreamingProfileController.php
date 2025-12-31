@@ -34,12 +34,17 @@ class StreamingProfileController extends Controller
             return back()->with('error', 'Maximum 5 profiles allowed per account.');
         }
         
-        Profile::create([
+        $profile = Profile::create([
             'user_id' => $user->id,
             'name' => $request->name,
             'avatar' => $request->avatar ?? 'default',
             'is_kid' => $request->is_kid ?? false,
         ]);
+        
+        // Set as current profile if it's the first one
+        if ($user->profiles()->count() === 1) {
+            session(['current_profile_id' => $profile->id]);
+        }
         
         return redirect()->route('profiles.index')->with('success', 'Profile created!');
     }
@@ -89,6 +94,6 @@ class StreamingProfileController extends Controller
         
         session(['current_profile_id' => $profile->id]);
         
-        return back()->with('success', 'Profile switched!');
+        return redirect()->route('catalog')->with('success', 'Profile switched!');
     }
 }

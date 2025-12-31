@@ -28,41 +28,53 @@ class MovieController extends Controller
     
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
             'duration' => 'required|integer|min:1',
             'release_year' => 'required|integer|min:1900|max:' . date('Y'),
-            'poster' => 'nullable|string',
-            'backdrop' => 'nullable|string',
-            'video_url' => 'nullable|string',
-            'is_featured' => 'boolean',
-            'genres' => 'array',
-            'actors' => 'array',
-            'directors' => 'array',
+            'poster' => 'nullable|string|max:500',
+            'backdrop' => 'nullable|string|max:500',
+            'video_url' => 'nullable|string|max:500',
+            'is_featured' => 'sometimes|boolean',
+            'genres' => 'nullable|array',
+            'genres.*' => 'exists:genres,id',
+            'actors' => 'nullable|array',
+            'actors.*' => 'exists:actors,id',
+            'directors' => 'nullable|array',
+            'directors.*' => 'exists:directors,id',
         ]);
+        
+        // Generate unique slug
+        $slug = Str::slug($validated['title']);
+        $originalSlug = $slug;
+        $counter = 1;
+        while (Movie::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
         
         $movie = Movie::create([
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'description' => $request->description,
-            'duration' => $request->duration,
-            'release_year' => $request->release_year,
-            'poster' => $request->poster,
-            'backdrop' => $request->backdrop,
-            'video_url' => $request->video_url,
-            'is_featured' => $request->is_featured ?? false,
+            'title' => $validated['title'],
+            'slug' => $slug,
+            'description' => $validated['description'],
+            'duration' => $validated['duration'],
+            'release_year' => $validated['release_year'],
+            'poster' => $validated['poster'] ?? null,
+            'backdrop' => $validated['backdrop'] ?? null,
+            'video_url' => $validated['video_url'] ?? null,
+            'is_featured' => $request->has('is_featured') && $request->is_featured == '1',
         ]);
         
-        if ($request->genres) {
+        if ($request->has('genres') && !empty($request->genres)) {
             $movie->genres()->attach($request->genres);
         }
         
-        if ($request->actors) {
+        if ($request->has('actors') && !empty($request->actors)) {
             $movie->actors()->attach($request->actors);
         }
         
-        if ($request->directors) {
+        if ($request->has('directors') && !empty($request->directors)) {
             $movie->directors()->attach($request->directors);
         }
         
