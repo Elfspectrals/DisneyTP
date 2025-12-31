@@ -73,15 +73,7 @@
         </div>
                 </nav>
 
-    <!-- Background Grid of Posters -->
-    <div class="fixed inset-0 z-0 overflow-hidden">
-        <div class="poster-grid">
-            @for($i = 0; $i < 100; $i++)
-            <div class="poster-item"></div>
-            @endfor
-        </div>
-        <div class="absolute inset-0 bg-gradient-to-b from-[#1a1a1a]/98 via-[#1a1a1a]/95 to-[#1a1a1a]"></div>
-    </div>
+
 
     <!-- Hero Section -->
     <section class="relative min-h-screen flex items-center justify-center z-10 px-4">
