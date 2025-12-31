@@ -17,6 +17,8 @@ Route::get('/', function () {
 
 // Public catalog routes (accessible to everyone)
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
+Route::get('/movies', [CatalogController::class, 'movies'])->name('movies');
+Route::get('/series', [CatalogController::class, 'series'])->name('series');
 Route::get('/content/{slug}', [ContentController::class, 'show'])->name('content.show');
 
 // Auth routes (from Breeze)
