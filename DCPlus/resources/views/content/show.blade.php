@@ -4,7 +4,7 @@
         <div class="relative h-[50vh] md:h-[60vh] overflow-hidden">
             @if($content->backdrop)
             <div class="absolute inset-0">
-                <img src="{{ $content->backdrop }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
+                <img src="{{ $content->backdrop_url ?? $content->backdrop }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-r from-[#1a1a1a] via-[#1a1a1a]/90 to-transparent"></div>
             </div>
             @else
@@ -27,9 +27,21 @@
                             <span class="text-yellow-400">★ {{ $content->rating }}</span>
                         </div>
                         <div class="flex gap-4">
-                            <a href="#" class="px-6 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition">
-                                ▶ Regarder
-                            </a>
+                            @if($content->video_url || ($content instanceof \App\Models\Series && $content->episodes->count() > 0))
+                            <button onclick="openPlayer()" class="px-6 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                </svg>
+                                Regarder
+                            </button>
+                            @else
+                            <button disabled class="px-6 py-3 bg-gray-500 text-white font-semibold rounded cursor-not-allowed flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                </svg>
+                                Vidéo non disponible
+                            </button>
+                            @endif
                             @auth
                             @if(auth()->user()->profiles()->exists())
                             @if($isInWatchlist)
@@ -61,7 +73,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div class="md:col-span-1">
                     @if($content->poster)
-                    <img src="{{ $content->poster }}" alt="{{ $content->title }}" class="w-full rounded-lg shadow-lg">
+                    <img src="{{ $content->poster_url ?? $content->poster }}" alt="{{ $content->title }}" class="w-full rounded-lg shadow-lg">
                     @endif
                 </div>
                 
@@ -99,11 +111,19 @@
                                 <h4 class="text-md font-semibold text-white mb-3">Saison {{ $season }}</h4>
                                 <div class="space-y-2">
                                     @foreach($episodes as $episode)
-                                    <div class="bg-white/5 p-4 rounded hover:bg-white/10 transition cursor-pointer">
+                                    <div 
+                                        onclick="playEpisode({{ $episode->id }}, '{{ $episode->video_url ? ($episode->video_url_display ?? $episode->video_url) : '' }}')"
+                                        class="bg-white/5 p-4 rounded hover:bg-white/10 transition cursor-pointer"
+                                    >
                                         <div class="flex justify-between items-center">
                                             <div class="flex items-center gap-4">
                                                 <span class="text-gray-400 text-sm">E{{ $episode->episode_number }}</span>
                                                 <span class="text-white font-medium">{{ $episode->title }}</span>
+                                                @if($episode->video_url)
+                                                <svg class="w-5 h-5 text-[#0063e5]" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                                </svg>
+                                                @endif
                                             </div>
                                             <span class="text-gray-400 text-sm">{{ $episode->duration }} min</span>
                                         </div>
@@ -171,4 +191,218 @@
             </div>
         </div>
     </div>
+
+    <!-- Video Player Modal -->
+    @if($content->video_url || ($content instanceof \App\Models\Series && $content->episodes->count() > 0))
+    <div id="videoPlayerModal" class="fixed inset-0 z-50 hidden bg-black">
+        <div class="relative w-full h-full flex items-center justify-center">
+            <!-- Close Button -->
+            <button onclick="closePlayer()" class="absolute top-4 right-4 z-50 text-white hover:text-gray-300 transition p-2 bg-black/50 rounded-full backdrop-blur-sm">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Episode Selector for Series -->
+            @if($content instanceof \App\Models\Series && $content->episodes->count() > 0)
+            <div id="episodeSelector" class="absolute top-4 left-4 z-50 bg-black/80 backdrop-blur-sm rounded-lg p-4 max-w-xs max-h-96 overflow-y-auto">
+                <h3 class="text-white font-semibold mb-3">Sélectionner un épisode</h3>
+                <div class="space-y-2">
+                    @foreach($content->episodes->groupBy('season_number') as $season => $episodes)
+                    <div class="mb-4">
+                        <h4 class="text-gray-300 text-sm font-semibold mb-2">Saison {{ $season }}</h4>
+                        @foreach($episodes as $episode)
+                        <button 
+                            onclick="loadEpisode({{ $episode->id }}, '{{ $episode->video_url ? ($episode->video_url_display ?? $episode->video_url) : '' }}')"
+                            class="w-full text-left px-3 py-2 rounded hover:bg-white/10 transition text-white text-sm"
+                        >
+                            <div class="flex items-center gap-2">
+                                <span class="text-gray-400">E{{ $episode->episode_number }}</span>
+                                <span>{{ $episode->title }}</span>
+                            </div>
+                        </button>
+                        @endforeach
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Video Player Container -->
+            <div class="w-full h-full max-w-7xl mx-auto px-4">
+                <div class="relative w-full" style="padding-top: 56.25%;">
+                    <video 
+                        id="videoPlayer" 
+                        class="absolute top-0 left-0 w-full h-full bg-black"
+                        controls
+                        controlsList="nodownload"
+                        preload="metadata"
+                        @if($watchProgress && $watchProgress->progress > 0)
+                        data-start-time="{{ $watchProgress->progress }}"
+                        @endif
+                    >
+                        @if($content instanceof \App\Models\Movie && $content->video_url)
+                        <source src="{{ $content->video_url_display ?? $content->video_url }}" type="video/mp4">
+                        @elseif($content instanceof \App\Models\Series && $content->episodes->count() > 0)
+                        @php
+                            $firstEpisode = $content->episodes->first();
+                            $episodeVideoUrl = $firstEpisode && $firstEpisode->video_url ? ($firstEpisode->video_url_display ?? $firstEpisode->video_url) : '';
+                        @endphp
+                        @if($episodeVideoUrl)
+                        <source src="{{ $episodeVideoUrl }}" type="video/mp4" data-episode-id="{{ $firstEpisode->id }}">
+                        @endif
+                        @endif
+                        Votre navigateur ne supporte pas la lecture de vidéos.
+                    </video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const videoPlayer = document.getElementById('videoPlayer');
+        const modal = document.getElementById('videoPlayerModal');
+        let progressInterval;
+        let currentEpisodeId = null;
+
+        function openPlayer() {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Start video
+            if (videoPlayer) {
+                // Resume from last position if available
+                const startTime = videoPlayer.dataset.startTime;
+                if (startTime && startTime > 0) {
+                    videoPlayer.currentTime = parseInt(startTime);
+                }
+                
+                videoPlayer.play().catch(err => {
+                    console.error('Error playing video:', err);
+                });
+                
+                // Track progress
+                startProgressTracking();
+            }
+        }
+
+        function closePlayer() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            
+            if (videoPlayer) {
+                videoPlayer.pause();
+                saveProgress();
+                stopProgressTracking();
+            }
+        }
+
+        function playEpisode(episodeId, videoUrl) {
+            if (!videoUrl) {
+                alert('Vidéo non disponible pour cet épisode');
+                return;
+            }
+            
+            // Open player if not already open
+            if (modal.classList.contains('hidden')) {
+                openPlayer();
+            }
+            
+            loadEpisode(episodeId, videoUrl);
+        }
+
+        function loadEpisode(episodeId, videoUrl) {
+            if (!videoUrl) {
+                alert('Vidéo non disponible pour cet épisode');
+                return;
+            }
+            
+            currentEpisodeId = episodeId;
+            const source = videoPlayer.querySelector('source');
+            if (source) {
+                source.src = videoUrl;
+                source.setAttribute('data-episode-id', episodeId);
+                videoPlayer.load();
+                videoPlayer.play().catch(err => console.error('Error playing episode:', err));
+            }
+        }
+
+        function startProgressTracking() {
+            progressInterval = setInterval(() => {
+                saveProgress();
+            }, 5000); // Save every 5 seconds
+        }
+
+        function stopProgressTracking() {
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+        }
+
+        function saveProgress() {
+            if (!videoPlayer) return;
+            
+            const progress = Math.floor(videoPlayer.currentTime);
+            const duration = videoPlayer.duration;
+            const completed = progress >= duration - 10; // Consider completed if within 10 seconds of end
+            
+            // For series, we might need to track episode progress separately
+            const episodeId = videoPlayer.querySelector('source')?.getAttribute('data-episode-id');
+            
+            fetch('{{ route("content.watch", $content->slug) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    progress: progress,
+                    completed: completed,
+                    episode_id: episodeId || null
+                })
+            }).catch(err => console.error('Error saving progress:', err));
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closePlayer();
+            }
+            
+            // Space bar to play/pause
+            if (e.key === ' ' && !modal.classList.contains('hidden')) {
+                e.preventDefault();
+                if (videoPlayer) {
+                    if (videoPlayer.paused) {
+                        videoPlayer.play();
+                    } else {
+                        videoPlayer.pause();
+                    }
+                }
+            }
+        });
+
+        // Save progress when video ends
+        if (videoPlayer) {
+            videoPlayer.addEventListener('ended', function() {
+                saveProgress();
+                stopProgressTracking();
+            });
+
+            // Save progress when leaving page
+            window.addEventListener('beforeunload', function() {
+                saveProgress();
+            });
+
+            // Hide episode selector when clicking on video
+            videoPlayer.addEventListener('click', function() {
+                const selector = document.getElementById('episodeSelector');
+                if (selector) {
+                    selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+        }
+    </script>
+    @endif
 </x-app-layout>

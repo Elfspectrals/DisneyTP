@@ -8,7 +8,7 @@
             @endphp
             @if($heroContent->backdrop)
             <div class="absolute inset-0">
-                <img src="{{ $heroContent->backdrop }}" alt="{{ $heroContent->title }}" class="w-full h-full object-cover">
+                <img src="{{ $heroContent->backdrop_url ?? $heroContent->backdrop }}" alt="{{ $heroContent->title }}" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-r from-[#1a1a1a] via-[#1a1a1a]/80 to-transparent"></div>
             </div>
             @else
@@ -73,7 +73,7 @@
                     <a href="{{ route('content.show', $movie->slug) }}" class="group flex-shrink-0">
                         <div class="relative w-48 h-72 rounded overflow-hidden bg-gray-800">
                             @if($movie->poster)
-                            <img src="{{ $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            <img src="{{ $movie->poster_url ?? $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                             @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-gray-400 text-center p-4">
                                 {{ $movie->title }}
@@ -95,7 +95,7 @@
                     <a href="{{ route('content.show', $series->slug) }}" class="group flex-shrink-0">
                         <div class="relative w-48 h-72 rounded overflow-hidden bg-gray-800">
                             @if($series->poster)
-                            <img src="{{ $series->poster }}" alt="{{ $series->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            <img src="{{ $series->poster_url ?? $series->poster }}" alt="{{ $series->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                             @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-gray-400 text-center p-4">
                                 {{ $series->title }}
@@ -117,7 +117,7 @@
                     <a href="{{ route('content.show', $movie->slug) }}" class="group flex-shrink-0">
                         <div class="relative w-48 h-72 rounded overflow-hidden bg-gray-800">
                             @if($movie->poster)
-                            <img src="{{ $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            <img src="{{ $movie->poster_url ?? $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                             @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-gray-400 text-center p-4">
                                 {{ $movie->title }}
@@ -139,7 +139,7 @@
                     <a href="{{ route('content.show', $series->slug) }}" class="group flex-shrink-0">
                         <div class="relative w-48 h-72 rounded overflow-hidden bg-gray-800">
                             @if($series->poster)
-                            <img src="{{ $series->poster }}" alt="{{ $series->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            <img src="{{ $series->poster_url ?? $series->poster }}" alt="{{ $series->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                             @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-gray-400 text-center p-4">
                                 {{ $series->title }}

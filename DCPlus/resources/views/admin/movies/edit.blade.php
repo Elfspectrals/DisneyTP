@@ -4,7 +4,7 @@
             <h1 class="text-4xl font-bold text-white mb-8">Modifier le film</h1>
             
             <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-8">
-                <form method="POST" action="{{ route('admin.movies.update', $movie) }}">
+                <form method="POST" action="{{ route('admin.movies.update', $movie) }}" enctype="multipart/form-data">
                     @csrf
                     @method('PATCH')
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -15,7 +15,8 @@
                         </div>
                         <div>
                             <label class="block text-white mb-2 font-semibold">Année de sortie *</label>
-                            <input type="number" name="release_year" value="{{ old('release_year', $movie->release_year) }}" required 
+                            <input type="date" name="release_year" value="{{ old('release_year', $movie->release_year ? date('Y-m-d', strtotime($movie->release_year . '-01-01')) : '') }}" required 
+                                min="1900-01-01" max="{{ date('Y-m-d') }}"
                                 class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent">
                         </div>
                     </div>
@@ -31,15 +32,41 @@
                                 class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent">
                         </div>
                         <div>
-                            <label class="block text-white mb-2 font-semibold">URL de l'affiche</label>
-                            <input type="text" name="poster" value="{{ old('poster', $movie->poster) }}" 
-                                class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent placeholder-gray-400">
+                            <label class="block text-white mb-2 font-semibold">Affiche (image)</label>
+                            @if($movie->poster)
+                            <div class="mb-2">
+                                <img src="{{ Storage::url($movie->poster) }}" alt="Affiche actuelle" class="w-32 h-48 object-cover rounded mb-2">
+                                <p class="text-gray-400 text-sm">Affiche actuelle</p>
+                            </div>
+                            @endif
+                            <input type="file" name="poster" accept="image/*" 
+                                class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#0063e5] file:text-white hover:file:bg-[#0483ee] file:cursor-pointer">
+                            <p class="text-gray-400 text-sm mt-2">Laisser vide pour conserver l'image actuelle</p>
                         </div>
                     </div>
                     <div class="mb-6">
-                        <label class="block text-white mb-2 font-semibold">URL de la vidéo</label>
-                        <input type="text" name="video_url" value="{{ old('video_url', $movie->video_url) }}" 
-                            class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent placeholder-gray-400">
+                        <label class="block text-white mb-2 font-semibold">Image de fond (backdrop)</label>
+                        @if($movie->backdrop)
+                        <div class="mb-2">
+                            <img src="{{ Storage::url($movie->backdrop) }}" alt="Backdrop actuel" class="w-full max-w-md h-32 object-cover rounded mb-2">
+                            <p class="text-gray-400 text-sm">Backdrop actuel</p>
+                        </div>
+                        @endif
+                        <input type="file" name="backdrop" accept="image/*" 
+                            class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#0063e5] file:text-white hover:file:bg-[#0483ee] file:cursor-pointer">
+                        <p class="text-gray-400 text-sm mt-2">Laisser vide pour conserver l'image actuelle</p>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-white mb-2 font-semibold">Vidéo</label>
+                        @if($movie->video_url)
+                        <div class="mb-2">
+                            <p class="text-gray-400 text-sm mb-2">Vidéo actuelle : {{ basename($movie->video_url) }}</p>
+                            <video src="{{ Storage::url($movie->video_url) }}" controls class="w-full max-w-md rounded mb-2"></video>
+                        </div>
+                        @endif
+                        <input type="file" name="video_url" accept="video/*" 
+                            class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#0063e5] file:text-white hover:file:bg-[#0483ee] file:cursor-pointer">
+                        <p class="text-gray-400 text-sm mt-2">Laisser vide pour conserver la vidéo actuelle</p>
                     </div>
                     <div class="mb-6">
                         <label class="flex items-center text-white cursor-pointer">

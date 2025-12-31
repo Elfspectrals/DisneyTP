@@ -10,7 +10,7 @@
                     <a href="{{ route('content.show', $watchlist->watchable->slug) }}" class="block">
                         <div class="relative w-48 h-72 rounded overflow-hidden bg-gray-800">
                             @if($watchlist->watchable->poster)
-                            <img src="{{ $watchlist->watchable->poster }}" alt="{{ $watchlist->watchable->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                            <img src="{{ $watchlist->watchable->poster_url ?? $watchlist->watchable->poster }}" alt="{{ $watchlist->watchable->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                             @else
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-700 to-gray-800 text-gray-400 text-center p-4">
                                 {{ $watchlist->watchable->title }}
