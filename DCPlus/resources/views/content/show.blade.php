@@ -17,26 +17,44 @@
     <div class="min-h-screen bg-[#0a0a0a] text-white">
         <!-- Full-Screen Video Player Section -->
         @if($content->video_url || ($content instanceof \App\Models\Series && $content->episodes->count() > 0))
-        <div id="videoSection" class="relative w-full h-screen overflow-hidden">
-            <!-- Backdrop Image -->
-            @if($content->backdrop)
-            <div class="absolute inset-0">
-                <img src="{{ $content->backdrop_url ?? $content->backdrop }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90"></div>
+        <div id="videoSection" class="relative w-full min-h-screen bg-black">
+            <!-- Top Bar with Title and Episode Info -->
+            <div class="absolute top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent px-6 py-4">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <a href="{{ route('catalog') }}" class="text-white hover:text-gray-300 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </a>
+                        <div>
+                            <h1 class="text-white text-xl font-semibold">{{ $content->title }}</h1>
+                            @if($content instanceof \App\Models\Series)
+                            @php
+                                $episodeToLoad = $currentEpisode ?? $nextEpisode ?? $content->episodes->first();
+                            @endphp
+                            @if($episodeToLoad)
+                            <p class="text-gray-400 text-sm">S{{ $episodeToLoad->season_number }}:E{{ $episodeToLoad->episode_number }} {{ $episodeToLoad->title }}</p>
+                            @endif
+                            @endif
+                        </div>
+                    </div>
+                    <button onclick="toggleEpisodeSelector()" class="text-white hover:text-gray-300 transition">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            @else
-            <div class="absolute inset-0 bg-gradient-to-br from-[#0063e5] via-[#764ba2] to-black"></div>
-            @endif
 
             <!-- Video Player Container -->
-            <div class="relative z-20 h-full flex items-center justify-center px-4">
-                <div class="w-full max-w-7xl">
+            <div class="relative w-full pt-16 pb-32">
+                <div class="max-w-7xl mx-auto px-6">
                     <!-- Video Player -->
-                    <div class="relative w-full" style="padding-top: 56.25%;">
+                    <div class="relative w-full bg-black rounded-lg overflow-hidden" style="padding-top: 56.25%;">
                         <video 
                             id="videoPlayer" 
-                            class="absolute top-0 left-0 w-full h-full bg-black rounded-lg shadow-2xl"
-                            controls
+                            class="absolute top-0 left-0 w-full h-full bg-black"
                             controlsList="nodownload"
                             preload="metadata"
                             @if($watchProgress && $watchProgress->progress > 0)
@@ -47,48 +65,107 @@
                             <source src="{{ $content->video_url_display ?? $content->video_url }}" type="video/mp4">
                             @elseif($content instanceof \App\Models\Series && $content->episodes->count() > 0)
                             @php
-                                $firstEpisode = $content->episodes->first();
-                                $episodeVideoUrl = $firstEpisode && $firstEpisode->video_url ? ($firstEpisode->video_url_display ?? $firstEpisode->video_url) : '';
+                                // Use current episode if available, otherwise use next episode, otherwise first episode
+                                $episodeToLoad = $currentEpisode ?? $nextEpisode ?? $content->episodes->first();
+                                $episodeVideoUrl = $episodeToLoad && $episodeToLoad->video_url ? ($episodeToLoad->video_url_display ?? $episodeToLoad->video_url) : '';
                             @endphp
                             @if($episodeVideoUrl)
-                            <source src="{{ $episodeVideoUrl }}" type="video/mp4" data-episode-id="{{ $firstEpisode->id }}">
+                            <source src="{{ $episodeVideoUrl }}" type="video/mp4" data-episode-id="{{ $episodeToLoad->id }}">
                             @endif
                             @endif
                             Votre navigateur ne supporte pas la lecture de vidéos.
                         </video>
                     </div>
 
-                    <!-- Video Controls Overlay -->
-                    <div id="videoControls" class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent transition-opacity duration-300">
-                        <div class="max-w-7xl mx-auto flex items-center justify-between">
-                            <div class="flex items-center gap-4">
-                                <button onclick="togglePlayPause()" id="playPauseBtn" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center hover:bg-gray-200 transition">
-                                    <svg id="playIcon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-                                    </svg>
-                                    <svg id="pauseIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                                <div class="text-white text-sm">
-                                    <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
-                                </div>
+                    <!-- Custom Video Controls -->
+                    <div id="videoControls" class="mt-4">
+                        <!-- Progress Bar -->
+                        <div class="relative mb-4">
+                            <div class="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+                                <div id="progressBar" class="h-full bg-[#0063e5] transition-all duration-300" style="width: 0%"></div>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <button onclick="toggleFullscreen()" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                                    </svg>
-                                </button>
+                            <input 
+                                type="range" 
+                                id="progressSlider" 
+                                min="0" 
+                                max="100" 
+                                value="0" 
+                                step="0.1"
+                                class="absolute top-0 left-0 w-full h-1 opacity-0 cursor-pointer"
+                                oninput="seekTo(this.value)"
+                            >
+                            <div class="flex justify-between items-center mt-2">
+                                <span id="currentTime" class="text-gray-400 text-sm">0:00</span>
+                                <span id="totalTime" class="text-gray-400 text-sm">0:00</span>
                             </div>
+                        </div>
+
+                        <!-- Playback Controls -->
+                        <div class="flex items-center justify-center gap-6">
+                            <button onclick="skipBackward()" class="text-white hover:text-gray-300 transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button onclick="rewind10()" class="text-white hover:text-gray-300 transition flex items-center gap-1">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0019 16V8a1 1 0 00-1.6-.8l-5.334 4zM4.066 11.2a1 1 0 000 1.6l5.334 4A1 1 0 0011 16V8a1 1 0 00-1.6-.8l-5.334 4z" />
+                                </svg>
+                                <span class="text-xs">10</span>
+                            </button>
+                            <button onclick="togglePlayPause()" id="playPauseBtn" class="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center hover:bg-gray-200 transition">
+                                <svg id="playIcon" class="w-7 h-7 hidden" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                </svg>
+                                <svg id="pauseIcon" class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                            <button onclick="forward10()" class="text-white hover:text-gray-300 transition flex items-center gap-1">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.933 12.8a1 1 0 000-1.6L6.6 7.2A1 1 0 005 8v8a1 1 0 001.6.8l5.333-4zM19.933 12.8a1 1 0 000-1.6l-5.333-4A1 1 0 0013 8v8a1 1 0 001.6.8l5.333-4z" />
+                                </svg>
+                                <span class="text-xs">10</span>
+                            </button>
+                            <button onclick="skipForward()" class="text-white hover:text-gray-300 transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Right Side Controls -->
+                        <div class="flex items-center justify-end gap-4 mt-4">
+                            @if($content instanceof \App\Models\Series && $nextEpisode)
+                            <button onclick="playNextEpisode()" id="nextEpisodeBtn" class="px-4 py-2 bg-[#0063e5] hover:bg-[#0483ee] text-white font-semibold rounded transition flex items-center gap-2">
+                                <span>Épisode suivant</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                            @endif
+                            <button onclick="toggleMute()" id="muteBtn" class="text-white hover:text-gray-300 transition">
+                                <svg id="volumeIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M6.343 6.343l8.485 8.485M6.343 17.657L4.93 19.07a1 1 0 01-1.414-1.414l1.414-1.414m14.142-8.485L19.07 4.93a1 1 0 011.414 1.414l-1.414 1.414" />
+                                </svg>
+                                <svg id="mutedIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                                </svg>
+                            </button>
+                            <button onclick="toggleFullscreen()" class="text-white hover:text-gray-300 transition">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Episode Selector for Series (Top Right) -->
+            <!-- Episode Selector for Series -->
             @if($content instanceof \App\Models\Series && $content->episodes->count() > 0)
-            <div id="episodeSelector" class="absolute top-20 right-4 z-30 bg-black/90 backdrop-blur-sm rounded-lg p-4 max-w-xs max-h-96 overflow-y-auto hidden">
+            <div id="episodeSelector" class="fixed top-16 right-4 z-50 bg-black/95 backdrop-blur-sm rounded-lg p-4 max-w-xs max-h-96 overflow-y-auto hidden border border-white/10">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-white font-semibold text-lg">Épisodes</h3>
                     <button onclick="toggleEpisodeSelector()" class="text-white hover:text-gray-300">
@@ -120,21 +197,7 @@
                     @endforeach
                 </div>
             </div>
-            <button onclick="toggleEpisodeSelector()" class="absolute top-20 right-4 z-30 bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-black/90 transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                Épisodes
-            </button>
             @endif
-
-            <!-- Back Button -->
-            <a href="{{ route('catalog') }}" class="absolute top-4 left-4 z-30 bg-black/60 backdrop-blur-sm text-white px-4 py-2 rounded-lg hover:bg-black/80 transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                Retour
-            </a>
         </div>
         @else
         <!-- No Video Available - Show Hero Banner Instead -->
@@ -316,9 +379,13 @@
         const pauseIcon = document.getElementById('pauseIcon');
         const currentTimeEl = document.getElementById('currentTime');
         const totalTimeEl = document.getElementById('totalTime');
+        const progressBar = document.getElementById('progressBar');
+        const progressSlider = document.getElementById('progressSlider');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeIcon = document.getElementById('volumeIcon');
+        const mutedIcon = document.getElementById('mutedIcon');
         let progressInterval;
         let currentEpisodeId = null;
-        let controlsTimeout;
 
         // Initialize video
         if (videoPlayer) {
@@ -328,21 +395,18 @@
                 videoPlayer.currentTime = parseInt(startTime);
             }
 
-            // Auto-play video
-            videoPlayer.play().catch(err => {
-                console.error('Error playing video:', err);
-            });
-
             // Track progress
             startProgressTracking();
 
-            // Update time display
+            // Update time display and progress bar
             videoPlayer.addEventListener('loadedmetadata', function() {
                 updateTimeDisplay();
+                updateProgressBar();
             });
 
             videoPlayer.addEventListener('timeupdate', function() {
                 updateTimeDisplay();
+                updateProgressBar();
             });
 
             // Handle play/pause icon
@@ -356,24 +420,22 @@
                 pauseIcon.classList.add('hidden');
             });
 
-            // Show/hide controls on mouse movement
-            videoPlayer.addEventListener('mousemove', function() {
-                showControls();
-            });
-
-            videoPlayer.addEventListener('mouseleave', function() {
-                hideControls();
-            });
-
-            // Auto-hide controls after 3 seconds
-            videoPlayer.addEventListener('play', function() {
-                setTimeout(hideControls, 3000);
+            // Handle volume changes
+            videoPlayer.addEventListener('volumechange', function() {
+                updateVolumeIcon();
             });
 
             // Save progress when video ends
             videoPlayer.addEventListener('ended', function() {
-                saveProgress();
+                saveProgress(true); // Pass true to indicate episode ended
                 stopProgressTracking();
+                
+                // Auto-play next episode if available
+                @if($content instanceof \App\Models\Series && $nextEpisode)
+                setTimeout(() => {
+                    playNextEpisode();
+                }, 3000); // Wait 3 seconds before auto-playing next episode
+                @endif
             });
 
             // Save progress when leaving page
@@ -423,11 +485,27 @@
                 videoPlayer.play().catch(err => console.error('Error playing episode:', err));
             }
 
+            // Update episode title in top bar
+            @if($content instanceof \App\Models\Series)
+            const episodeInfo = document.querySelector('#videoSection .text-gray-400');
+            if (episodeInfo) {
+                // Extract season and episode number from episode title or use data
+                const episodeBtn = document.querySelector(`[data-episode-id="${episodeId}"]`);
+                if (episodeBtn) {
+                    const episodeNum = episodeBtn.querySelector('.text-gray-400')?.textContent || '';
+                    episodeInfo.textContent = episodeNum + ' ' + episodeTitle;
+                }
+            }
+            @endif
+
             // Update active episode button
             document.querySelectorAll('.episode-btn').forEach(btn => {
                 btn.classList.remove('bg-white/20');
             });
-            document.querySelector(`[data-episode-id="${episodeId}"]`).classList.add('bg-white/20');
+            const activeBtn = document.querySelector(`[data-episode-id="${episodeId}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-white/20');
+            }
 
             // Hide episode selector
             toggleEpisodeSelector();
@@ -440,25 +518,68 @@
             }
         }
 
+        function updateProgressBar() {
+            if (videoPlayer && videoPlayer.duration) {
+                const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+                progressBar.style.width = progress + '%';
+                progressSlider.value = progress;
+            }
+        }
+
+        function seekTo(percentage) {
+            if (videoPlayer && videoPlayer.duration) {
+                videoPlayer.currentTime = (percentage / 100) * videoPlayer.duration;
+            }
+        }
+
         function formatTime(seconds) {
             const mins = Math.floor(seconds / 60);
             const secs = Math.floor(seconds % 60);
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
-        function showControls() {
-            if (videoControls) {
-                videoControls.classList.remove('opacity-0');
-                videoControls.classList.add('opacity-100');
+        function skipBackward() {
+            if (videoPlayer) {
+                // Skip to previous episode or beginning
+                videoPlayer.currentTime = 0;
             }
-            clearTimeout(controlsTimeout);
-            controlsTimeout = setTimeout(hideControls, 3000);
         }
 
-        function hideControls() {
-            if (videoControls && !videoPlayer.paused) {
-                videoControls.classList.remove('opacity-100');
-                videoControls.classList.add('opacity-0');
+        function rewind10() {
+            if (videoPlayer) {
+                videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
+            }
+        }
+
+        function forward10() {
+            if (videoPlayer && videoPlayer.duration) {
+                videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
+            }
+        }
+
+        function skipForward() {
+            if (videoPlayer && videoPlayer.duration) {
+                // Skip to next episode or end
+                videoPlayer.currentTime = videoPlayer.duration - 1;
+            }
+        }
+
+        function toggleMute() {
+            if (videoPlayer) {
+                videoPlayer.muted = !videoPlayer.muted;
+                updateVolumeIcon();
+            }
+        }
+
+        function updateVolumeIcon() {
+            if (videoPlayer) {
+                if (videoPlayer.muted || videoPlayer.volume === 0) {
+                    volumeIcon.classList.add('hidden');
+                    mutedIcon.classList.remove('hidden');
+                } else {
+                    volumeIcon.classList.remove('hidden');
+                    mutedIcon.classList.add('hidden');
+                }
             }
         }
 
@@ -474,12 +595,12 @@
             }
         }
 
-        function saveProgress() {
+        function saveProgress(episodeEnded = false) {
             if (!videoPlayer) return;
             
             const progress = Math.floor(videoPlayer.currentTime);
             const duration = videoPlayer.duration;
-            const completed = progress >= duration - 10; // Consider completed if within 10 seconds of end
+            const completed = episodeEnded || progress >= duration - 10; // Consider completed if within 10 seconds of end
             
             // For series, we might need to track episode progress separately
             const episodeId = videoPlayer.querySelector('source')?.getAttribute('data-episode-id');
@@ -496,8 +617,58 @@
                     completed: completed,
                     episode_id: episodeId || null
                 })
-            }).catch(err => console.error('Error saving progress:', err));
+            })
+            .then(response => response.json())
+            .then(data => {
+                // If next episode info is returned, update the next episode data and button
+                if (data.next_episode) {
+                    nextEpisodeData = data.next_episode;
+                    updateNextEpisodeButton(data.next_episode);
+                    
+                    // Show/hide next episode button based on availability
+                    const nextBtn = document.getElementById('nextEpisodeBtn');
+                    if (nextBtn) {
+                        if (data.next_episode.video_url) {
+                            nextBtn.style.display = 'flex';
+                        } else {
+                            nextBtn.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(err => console.error('Error saving progress:', err));
         }
+        
+        function playNextEpisode() {
+            if (nextEpisodeData && nextEpisodeData.video_url) {
+                loadEpisode(nextEpisodeData.id, nextEpisodeData.video_url, nextEpisodeData.title);
+            }
+        }
+        
+        function updateNextEpisodeButton(nextEpisodeData) {
+            if (nextEpisodeData && nextEpisodeData.video_url) {
+                // Update the next episode button to use the new next episode
+                const nextBtn = document.getElementById('nextEpisodeBtn');
+                if (nextBtn) {
+                    nextBtn.onclick = function() {
+                        loadEpisode(nextEpisodeData.id, nextEpisodeData.video_url, nextEpisodeData.title);
+                    };
+                }
+            }
+        }
+        
+        // Store next episode data globally
+        let nextEpisodeData = @if($content instanceof \App\Models\Series && $nextEpisode)
+        {
+            id: {{ $nextEpisode->id }},
+            title: '{{ addslashes($nextEpisode->title) }}',
+            video_url: '{{ $nextEpisode->video_url ? ($nextEpisode->video_url_display ?? $nextEpisode->video_url) : '' }}',
+            season_number: {{ $nextEpisode->season_number }},
+            episode_number: {{ $nextEpisode->episode_number }}
+        }
+        @else
+        null
+        @endif;
 
         // Keyboard controls
         document.addEventListener('keydown', function(e) {
@@ -512,13 +683,17 @@
             // Arrow keys for seeking
             if (e.key === 'ArrowLeft') {
                 e.preventDefault();
-                videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
-                showControls();
+                rewind10();
             }
             if (e.key === 'ArrowRight') {
                 e.preventDefault();
-                videoPlayer.currentTime = Math.min(videoPlayer.duration, videoPlayer.currentTime + 10);
-                showControls();
+                forward10();
+            }
+            
+            // M for mute
+            if (e.key === 'm' || e.key === 'M') {
+                e.preventDefault();
+                toggleMute();
             }
 
             // F for fullscreen
@@ -528,12 +703,24 @@
             }
         });
 
-        // Mark first episode as active on load
+        // Mark current episode as active on load
         @if($content instanceof \App\Models\Series && $content->episodes->count() > 0)
+        @if($currentEpisode)
+        const currentEpisodeBtn = document.querySelector(`[data-episode-id="{{ $currentEpisode->id }}"]`);
+        if (currentEpisodeBtn) {
+            currentEpisodeBtn.classList.add('bg-white/20');
+        }
+        @elseif($nextEpisode)
+        const nextEpisodeBtn = document.querySelector(`[data-episode-id="{{ $nextEpisode->id }}"]`);
+        if (nextEpisodeBtn) {
+            nextEpisodeBtn.classList.add('bg-white/20');
+        }
+        @else
         const firstEpisode = document.querySelector('.episode-btn');
         if (firstEpisode) {
             firstEpisode.classList.add('bg-white/20');
         }
+        @endif
         @endif
     </script>
     @endif
