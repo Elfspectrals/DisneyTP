@@ -27,17 +27,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                             </svg>
                         </a>
-                        <div>
-                            <h1 class="text-white text-xl font-semibold">{{ $content->title }}</h1>
-                            @if($content instanceof \App\Models\Series)
-                            @php
-                                $episodeToLoad = $currentEpisode ?? $nextEpisode ?? $content->episodes->first();
-                            @endphp
-                            @if($episodeToLoad)
-                            <p class="text-gray-400 text-sm">S{{ $episodeToLoad->season_number }}:E{{ $episodeToLoad->episode_number }} {{ $episodeToLoad->title }}</p>
-                            @endif
-                            @endif
-                        </div>
+
                     </div>
                     <button onclick="toggleEpisodeSelector()" class="text-white hover:text-gray-300 transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,9 +288,18 @@
                     @if($content->actors->count() > 0)
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-white mb-3">Distribution</h3>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             @foreach($content->actors as $actor)
-                            <span class="text-gray-300">{{ $actor->name }}</span>@if(!$loop->last),@endif
+                            <div class="flex flex-col items-center">
+                                @if($actor->photo && $actor->photo_url)
+                                <img src="{{ $actor->photo_url }}" alt="{{ $actor->name }}" class="w-20 h-20 rounded-full object-cover border-2 border-white/20 mb-2 hover:border-[#0063e5] transition">
+                                @else
+                                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold text-xl mb-2 border-2 border-white/20">
+                                    {{ strtoupper(substr($actor->name, 0, 1)) }}
+                                </div>
+                                @endif
+                                <p class="text-gray-300 text-sm text-center">{{ $actor->name }}</p>
+                            </div>
                             @endforeach
                         </div>
                     </div>
@@ -309,9 +308,18 @@
                     @if($content->directors->count() > 0)
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-white mb-3">Réalisateur{{ $content->directors->count() > 1 ? 's' : '' }}</h3>
-                        <div class="flex flex-wrap gap-2">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                             @foreach($content->directors as $director)
-                            <span class="text-gray-300">{{ $director->name }}</span>@if(!$loop->last),@endif
+                            <div class="flex flex-col items-center">
+                                @if($director->photo && $director->photo_url)
+                                <img src="{{ $director->photo_url }}" alt="{{ $director->name }}" class="w-20 h-20 rounded-full object-cover border-2 border-white/20 mb-2 hover:border-[#0063e5] transition">
+                                @else
+                                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-semibold text-xl mb-2 border-2 border-white/20">
+                                    {{ strtoupper(substr($director->name, 0, 1)) }}
+                                </div>
+                                @endif
+                                <p class="text-gray-300 text-sm text-center">{{ $director->name }}</p>
+                            </div>
                             @endforeach
                         </div>
                     </div>

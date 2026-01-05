@@ -178,17 +178,10 @@ class MovieController extends Controller
         
         $movie->update($updateData);
         
-        if ($request->genres) {
-            $movie->genres()->sync($request->genres);
-        }
-        
-        if ($request->actors) {
-            $movie->actors()->sync($request->actors);
-        }
-        
-        if ($request->directors) {
-            $movie->directors()->sync($request->directors);
-        }
+        // Sync genres, actors, and directors (use empty array if not provided to allow removal)
+        $movie->genres()->sync($request->genres ?? []);
+        $movie->actors()->sync($request->actors ?? []);
+        $movie->directors()->sync($request->directors ?? []);
         
         return redirect()->route('admin.movies.index')->with('success', 'Movie updated!');
     }

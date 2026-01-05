@@ -38,6 +38,15 @@
                         <a href="{{ route('admin.series.index') }}" class="block w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 rounded transition text-center font-medium">
                             Gérer les séries
                         </a>
+                        <a href="{{ route('admin.genres.index') }}" class="block w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 rounded transition text-center font-medium">
+                            Gérer les genres
+                        </a>
+                        <a href="{{ route('admin.actors.index') }}" class="block w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 rounded transition text-center font-medium">
+                            Gérer les acteurs
+                        </a>
+                        <a href="{{ route('admin.directors.index') }}" class="block w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white px-4 py-3 rounded transition text-center font-medium">
+                            Gérer les réalisateurs
+                        </a>
                     </div>
                 </div>
 

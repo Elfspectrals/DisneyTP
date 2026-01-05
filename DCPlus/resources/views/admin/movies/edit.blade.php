@@ -85,6 +85,26 @@
                         </select>
                         <p class="text-gray-400 text-sm mt-2">Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs genres</p>
                     </div>
+                    <div class="mb-6">
+                        <label class="block text-white mb-2 font-semibold">Acteurs</label>
+                        <select name="actors[]" multiple 
+                            class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent">
+                            @foreach($actors as $actor)
+                            <option value="{{ $actor->id }}" {{ $movie->actors->contains($actor->id) ? 'selected' : '' }}>{{ $actor->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-gray-400 text-sm mt-2">Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs acteurs</p>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-white mb-2 font-semibold">Réalisateurs</label>
+                        <select name="directors[]" multiple 
+                            class="w-full bg-white/10 border border-white/20 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#0063e5] focus:border-transparent">
+                            @foreach($directors as $director)
+                            <option value="{{ $director->id }}" {{ $movie->directors->contains($director->id) ? 'selected' : '' }}>{{ $director->name }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-gray-400 text-sm mt-2">Maintenez Ctrl (ou Cmd sur Mac) pour sélectionner plusieurs réalisateurs</p>
+                    </div>
                     <div class="flex gap-4">
                         <button type="submit" class="px-6 py-3 bg-[#0063e5] hover:bg-[#0483ee] text-white font-semibold rounded-lg transition">
                             Mettre à jour

@@ -7,6 +7,9 @@ use App\Http\Controllers\StreamingProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\MovieController;
 use App\Http\Controllers\Admin\SeriesController;
+use App\Http\Controllers\Admin\GenreController;
+use App\Http\Controllers\Admin\ActorController;
+use App\Http\Controllers\Admin\DirectorController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -62,4 +65,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('series', SeriesController::class);
     Route::get('/series/{series}/episodes', [SeriesController::class, 'episodes'])->name('series.episodes');
     Route::post('/series/{series}/episodes', [SeriesController::class, 'storeEpisode'])->name('series.episodes.store');
+    
+    // Genres management
+    Route::resource('genres', GenreController::class);
+    
+    // Actors management
+    Route::resource('actors', ActorController::class);
+    
+    // Directors management
+    Route::resource('directors', DirectorController::class);
 });
