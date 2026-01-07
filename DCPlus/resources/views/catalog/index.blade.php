@@ -1,9 +1,51 @@
 <x-app-layout>
     <div class="min-h-screen bg-[#1a1a1a]">
+        @if(request('search'))
+    {{-- MODE RECHERCHE --}}
+    <div class="max-w-7xl mx-auto px-8 py-12">
+        <h2 class="text-3xl font-bold text-white mb-8">
+            Résultats pour « {{ request('search') }} »
+        </h2>
+
+        {{-- Films --}}
+        @if($movies->count())
+            <h3 class="text-2xl font-semibold text-white mb-4">Films</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-12">
+                @foreach($movies as $movie)
+                    <a href="{{ route('content.show', $movie->slug) }}">
+                        <img src="{{ $movie->poster_url ?? $movie->poster }}"
+                             alt="{{ $movie->title }}"
+                             class="rounded hover:scale-105 transition">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
+        {{-- Séries --}}
+        @if($series->count())
+            <h3 class="text-2xl font-semibold text-white mb-4">Séries</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                @foreach($series as $serie)
+                    <a href="{{ route('content.show', $serie->slug) }}">
+                        <img src="{{ $serie->poster_url ?? $serie->poster }}"
+                             alt="{{ $serie->title }}"
+                             class="rounded hover:scale-105 transition">
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
+        @if(!$movies->count() && !$series->count())
+            <p class="text-gray-400">Aucun résultat trouvé.</p>
+        @endif
+    </div>
+
+@else
+
         <!-- Hero Banner Section -->
         @if($featuredMovies->first() || $featuredSeries->first())
         <div class="relative h-[60vh] md:h-[70vh] overflow-hidden">
-            @php
+            @php 
                 $heroContent = $featuredMovies->first() ?? $featuredSeries->first();
             @endphp
             @if($heroContent->backdrop)
@@ -164,4 +206,5 @@
             display: none;
         }
     </style>
+    @endif
 </x-app-layout>
