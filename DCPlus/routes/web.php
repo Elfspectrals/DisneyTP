@@ -23,6 +23,7 @@ Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/movies', [CatalogController::class, 'movies'])->name('movies');
 Route::get('/series', [CatalogController::class, 'series'])->name('series');
 Route::get('/content/{slug}', [ContentController::class, 'show'])->name('content.show');
+Route::get('/search', [CatalogController::class, 'search'])->name('search');
 
 // Auth routes (from Breeze)
 require __DIR__.'/auth.php';

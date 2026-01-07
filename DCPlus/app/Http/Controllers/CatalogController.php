@@ -8,8 +8,22 @@ use Illuminate\Http\Request;
 
 class CatalogController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->input('search');
+
+        if ($search) {
+        $movies = Movie::where('title', 'LIKE', '%' . $search . '%')
+            ->orderBy('release_year', 'desc')
+            ->get();
+
+        $series = Series::where('title', 'LIKE', '%' . $search . '%')
+            ->orderBy('release_year', 'desc')
+            ->get();
+
+        return view('catalog.index', compact('movies', 'series', 'search'));
+    }
+
         $featuredMovies = Movie::where('is_featured', true)
             ->orderBy('rating', 'desc')
             ->take(10)
@@ -55,4 +69,22 @@ class CatalogController extends Controller
         
         return view('catalog.series', compact('series', 'featuredSeries'));
     }
+
+    // public function search(Request $request)
+    // {
+    //     $search = $request->input('search');
+
+    //     $movies = Movie::where('title', 'LIKE', '%' . $search . '%')
+    //         ->orderBy('release_year', 'desc')
+    //         ->take(20)
+    //         ->get();
+
+    //     $series = Series::where('title', 'LIKE', '%' . $search . '%')
+    //         ->orderBy('release_year', 'desc')
+    //         ->take(20)
+    //         ->get();
+
+    //     return view('catalog.search', compact('movies', 'series', 'search'));
+    // }
+
 }

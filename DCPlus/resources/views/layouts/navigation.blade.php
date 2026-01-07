@@ -42,6 +42,7 @@
                         <span class="font-medium">ADMIN</span>
                     </a>
                     @endif
+                     <x-search-bar />
                 </div>
                 @endauth
             </div>
