@@ -12,7 +12,7 @@
             <h3 class="text-2xl font-semibold text-white mb-4">Films</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 mb-12">
                 @foreach($movies as $movie)
-                    <a href="{{ route('content.show', $movie->slug) }}">
+                    <a href="{{ route('content.show', ['slug' => $movie->slug]) }}">
                         <img src="{{ $movie->poster_url ?? $movie->poster }}"
                              alt="{{ $movie->title }}"
                              class="rounded hover:scale-105 transition">
@@ -26,7 +26,7 @@
             <h3 class="text-2xl font-semibold text-white mb-4">Séries</h3>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 @foreach($series as $serie)
-                    <a href="{{ route('content.show', $serie->slug) }}">
+                    <a href="{{ route('content.show', ['slug' => $serie->slug]) }}">
                         <img src="{{ $serie->poster_url ?? $serie->poster }}"
                              alt="{{ $serie->title }}"
                              class="rounded hover:scale-105 transition">
@@ -45,7 +45,7 @@
         <!-- Hero Banner Section -->
         @if($featuredMovies->first() || $featuredSeries->first())
         <div class="relative h-[60vh] md:h-[70vh] overflow-hidden">
-            @php 
+            @php
                 $heroContent = $featuredMovies->first() ?? $featuredSeries->first();
             @endphp
             @if($heroContent->backdrop)
@@ -56,7 +56,7 @@
             @else
             <div class="absolute inset-0 bg-gradient-to-br from-[#0063e5] to-[#764ba2]"></div>
             @endif
-            
+
             <div class="relative z-10 h-full flex items-center">
                 <div class="max-w-7xl mx-auto px-8 w-full">
                     <div class="max-w-2xl">
@@ -85,7 +85,7 @@
                         </div>
                         <p class="text-lg text-gray-300 mb-6 line-clamp-3">{{ $heroContent->description }}</p>
                         <div class="flex gap-4">
-                            <a href="{{ route('content.show', $heroContent->slug) }}" class="px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition">
+                            <a href="{{ route('content.show', ['slug' => $heroContent->slug]) }}" class="px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition">
                                 ▶ Regarder
                             </a>
                             @auth
@@ -107,12 +107,12 @@
 
         <!-- Content Sections -->
         <div class="max-w-7xl mx-auto px-8 py-8">
-            @if($featuredMovies->count() > 0)
+            @if($featuredMovies->count())
             <div class="mb-12">
                 <h3 class="text-2xl font-bold text-white mb-4">Films en vedette</h3>
                 <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                     @foreach($featuredMovies as $movie)
-                    <a href="{{ route('content.show', $movie->slug) }}" class="group flex-shrink-0">
+                    <a href="{{ route('content.show', ['slug' => $movie->slug]) }}" class="group flex-shrink-0">
                         <div class="relative w-48 h-72 rounded overflow-hidden bg-gray-800">
                             @if($movie->poster)
                             <img src="{{ $movie->poster_url ?? $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
@@ -129,7 +129,7 @@
             </div>
             @endif
 
-            @if($featuredSeries->count() > 0)
+            @if($featuredSeries->count())
             <div class="mb-12">
                 <h3 class="text-2xl font-bold text-white mb-4">Séries en vedette</h3>
                 <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
@@ -151,12 +151,12 @@
             </div>
             @endif
 
-            @if($latestMovies->count() > 0)
+            @if($latestMovies->count())
             <div class="mb-12">
                 <h3 class="text-2xl font-bold text-white mb-4">Derniers films</h3>
                 <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                     @foreach($latestMovies as $movie)
-                    <a href="{{ route('content.show', $movie->slug) }}" class="group flex-shrink-0">
+                    <a href="{{ route('content.show', ['slug' => $movie->slug]) }}" class="group flex-shrink-0">
                         <div class="relative w-48 h-72 rounded overflow-hidden bg-gray-800">
                             @if($movie->poster)
                             <img src="{{ $movie->poster_url ?? $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
@@ -173,7 +173,7 @@
             </div>
             @endif
 
-            @if($latestSeries->count() > 0)
+            @if($latestSeries->count())
             <div class="mb-12">
                 <h3 class="text-2xl font-bold text-white mb-4">Dernières séries</h3>
                 <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
@@ -196,7 +196,7 @@
             @endif
         </div>
     </div>
-    
+
     <style>
         .scrollbar-hide {
             -ms-overflow-style: none;

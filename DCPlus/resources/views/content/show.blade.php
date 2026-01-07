@@ -16,7 +16,7 @@
     </style>
     <div class="min-h-screen bg-[#0a0a0a] text-white">
         <!-- Full-Screen Video Player Section -->
-        @if($content->video_url || ($content instanceof \App\Models\Series && $content->episodes->count() > 0))
+        @if($content->video_url || ($content instanceof \App\Models\Series && $content->episodes->count()))
         <div id="videoSection" class="relative w-full min-h-screen bg-black">
             <!-- Top Bar with Title and Episode Info -->
             <div class="absolute top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/80 to-transparent px-6 py-4">
@@ -42,8 +42,8 @@
                 <div class="max-w-7xl mx-auto px-6">
                     <!-- Video Player -->
                     <div class="relative w-full bg-black rounded-lg overflow-hidden" style="padding-top: 56.25%;">
-                        <video 
-                            id="videoPlayer" 
+                        <video
+                            id="videoPlayer"
                             class="absolute top-0 left-0 w-full h-full bg-black"
                             controlsList="nodownload"
                             preload="metadata"
@@ -53,7 +53,7 @@
                         >
                             @if($content instanceof \App\Models\Movie && $content->video_url)
                             <source src="{{ $content->video_url_display ?? $content->video_url }}" type="video/mp4">
-                            @elseif($content instanceof \App\Models\Series && $content->episodes->count() > 0)
+                            @elseif($content instanceof \App\Models\Series && $content->episodes->count())
                             @php
                                 // Use current episode if available, otherwise use next episode, otherwise first episode
                                 $episodeToLoad = $currentEpisode ?? $nextEpisode ?? $content->episodes->first();
@@ -74,12 +74,12 @@
                             <div class="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
                                 <div id="progressBar" class="h-full bg-[#0063e5] transition-all duration-300" style="width: 0%"></div>
                             </div>
-                            <input 
-                                type="range" 
-                                id="progressSlider" 
-                                min="0" 
-                                max="100" 
-                                value="0" 
+                            <input
+                                type="range"
+                                id="progressSlider"
+                                min="0"
+                                max="100"
+                                value="0"
                                 step="0.1"
                                 class="absolute top-0 left-0 w-full h-1 opacity-0 cursor-pointer"
                                 oninput="seekTo(this.value)"
@@ -154,7 +154,7 @@
             </div>
 
             <!-- Episode Selector for Series -->
-            @if($content instanceof \App\Models\Series && $content->episodes->count() > 0)
+            @if($content instanceof \App\Models\Series && $content->episodes->count())
             <div id="episodeSelector" class="fixed top-16 right-4 z-50 bg-black/95 backdrop-blur-sm rounded-lg p-4 max-w-xs max-h-96 overflow-y-auto hidden border border-white/10">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-white font-semibold text-lg">Épisodes</h3>
@@ -169,7 +169,7 @@
                     <div class="mb-4">
                         <h4 class="text-gray-300 text-sm font-semibold mb-2 px-2">Saison {{ $season }}</h4>
                         @foreach($episodes as $episode)
-                        <button 
+                        <button
                             onclick="loadEpisode({{ $episode->id }}, '{{ $episode->video_url ? ($episode->video_url_display ?? $episode->video_url) : '' }}', '{{ $episode->title }}')"
                             class="w-full text-left px-3 py-2 rounded hover:bg-white/10 transition text-white text-sm flex items-center gap-2 episode-btn"
                             data-episode-id="{{ $episode->id }}"
@@ -200,7 +200,7 @@
             @else
             <div class="absolute inset-0 bg-gradient-to-br from-[#0063e5] to-[#764ba2]"></div>
             @endif
-            
+
             <div class="relative z-10 h-full flex items-end">
                 <div class="max-w-7xl mx-auto px-8 w-full pb-12">
                     <div class="max-w-3xl">
@@ -236,7 +236,7 @@
                     <img src="{{ $content->poster_url ?? $content->poster }}" alt="{{ $content->title }}" class="w-full rounded-lg shadow-lg">
                     @endif
                 </div>
-                
+
                 <div class="md:col-span-3">
                     <div class="flex items-center gap-4 mb-6">
                         <h2 class="text-3xl font-bold text-white">{{ $content->title }}</h2>
@@ -274,7 +274,7 @@
                         <span class="text-yellow-400">★ {{ $content->rating }}</span>
                     </div>
 
-                    @if($content->genres->count() > 0)
+                    @if($content->genres->count())
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-white mb-3">Genres</h3>
                         <div class="flex flex-wrap gap-2">
@@ -285,7 +285,7 @@
                     </div>
                     @endif
 
-                    @if($content->actors->count() > 0)
+                    @if($content->actors->count())
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-white mb-3">Distribution</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -305,7 +305,7 @@
                     </div>
                     @endif
 
-                    @if($content->directors->count() > 0)
+                    @if($content->directors->count())
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-white mb-3">Réalisateur{{ $content->directors->count() > 1 ? 's' : '' }}</h3>
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -352,7 +352,7 @@
                     @endif
                     @endauth
 
-                    @if($content->reviews->count() > 0)
+                    @if($content->reviews->count())
                     <div>
                         <h3 class="text-lg font-semibold text-white mb-4">Avis des spectateurs</h3>
                         <div class="space-y-4">
@@ -378,7 +378,7 @@
         </div>
     </div>
 
-    @if($content->video_url || ($content instanceof \App\Models\Series && $content->episodes->count() > 0))
+    @if($content->video_url || ($content instanceof \App\Models\Series && $content->episodes->count()))
     <script>
         const videoPlayer = document.getElementById('videoPlayer');
         const videoControls = document.getElementById('videoControls');
@@ -437,7 +437,7 @@
             videoPlayer.addEventListener('ended', function() {
                 saveProgress(true); // Pass true to indicate episode ended
                 stopProgressTracking();
-                
+
                 // Auto-play next episode if available
                 @if($content instanceof \App\Models\Series && $nextEpisode)
                 setTimeout(() => {
@@ -483,7 +483,7 @@
                 alert('Vidéo non disponible pour cet épisode');
                 return;
             }
-            
+
             currentEpisodeId = episodeId;
             const source = videoPlayer.querySelector('source');
             if (source) {
@@ -605,14 +605,14 @@
 
         function saveProgress(episodeEnded = false) {
             if (!videoPlayer) return;
-            
+
             const progress = Math.floor(videoPlayer.currentTime);
             const duration = videoPlayer.duration;
             const completed = episodeEnded || progress >= duration - 10; // Consider completed if within 10 seconds of end
-            
+
             // For series, we might need to track episode progress separately
             const episodeId = videoPlayer.querySelector('source')?.getAttribute('data-episode-id');
-            
+
             fetch('{{ route("content.watch", $content->slug) }}', {
                 method: 'POST',
                 headers: {
@@ -632,7 +632,7 @@
                 if (data.next_episode) {
                     nextEpisodeData = data.next_episode;
                     updateNextEpisodeButton(data.next_episode);
-                    
+
                     // Show/hide next episode button based on availability
                     const nextBtn = document.getElementById('nextEpisodeBtn');
                     if (nextBtn) {
@@ -646,13 +646,13 @@
             })
             .catch(err => console.error('Error saving progress:', err));
         }
-        
+
         function playNextEpisode() {
             if (nextEpisodeData && nextEpisodeData.video_url) {
                 loadEpisode(nextEpisodeData.id, nextEpisodeData.video_url, nextEpisodeData.title);
             }
         }
-        
+
         function updateNextEpisodeButton(nextEpisodeData) {
             if (nextEpisodeData && nextEpisodeData.video_url) {
                 // Update the next episode button to use the new next episode
@@ -664,7 +664,7 @@
                 }
             }
         }
-        
+
         // Store next episode data globally
         let nextEpisodeData = @if($content instanceof \App\Models\Series && $nextEpisode)
         {
@@ -697,7 +697,7 @@
                 e.preventDefault();
                 forward10();
             }
-            
+
             // M for mute
             if (e.key === 'm' || e.key === 'M') {
                 e.preventDefault();
@@ -712,7 +712,7 @@
         });
 
         // Mark current episode as active on load
-        @if($content instanceof \App\Models\Series && $content->episodes->count() > 0)
+        @if($content instanceof \App\Models\Series && $content->episodes->count())
         @if($currentEpisode)
         const currentEpisodeBtn = document.querySelector(`[data-episode-id="{{ $currentEpisode->id }}"]`);
         if (currentEpisodeBtn) {

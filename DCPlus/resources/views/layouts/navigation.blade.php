@@ -5,7 +5,7 @@
             <div class="flex items-center">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center mr-8">
-                    <a href="{{ route('home') }}" class="text-2xl font-bold text-white tracking-tight">
+                    <a href="{{ route(auth()->check() ? 'catalog' : 'home') }}" class="text-2xl font-bold text-white tracking-tight">
                         DCPlus
                     </a>
                 </div>

@@ -14,7 +14,7 @@
             @else
             <div class="absolute inset-0 bg-gradient-to-br from-[#0063e5] to-[#764ba2]"></div>
             @endif
-            
+
             <div class="relative z-10 h-full flex items-center">
                 <div class="max-w-7xl mx-auto px-8 w-full">
                     <div class="max-w-2xl">
@@ -36,7 +36,7 @@
                         </div>
                         <p class="text-lg text-gray-300 mb-6 line-clamp-3">{{ $heroContent->description }}</p>
                         <div class="flex gap-4">
-                            <a href="{{ route('content.show', $heroContent->slug) }}" class="px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition">
+                            <a href="{{ route('content.show', ['slug' => $heroContent->slug]) }}" class="px-8 py-3 bg-white text-black font-semibold rounded hover:bg-gray-200 transition">
                                 ▶ Regarder
                             </a>
                             @auth
@@ -63,10 +63,10 @@
                 <p class="text-gray-400">{{ $movies->total() }} films disponibles</p>
             </div>
 
-            @if($movies->count() > 0)
+            @if($movies->count())
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
                 @foreach($movies as $movie)
-                <a href="{{ route('content.show', $movie->slug) }}" class="group">
+                <a href="{{ route('content.show', ['slug' => $movie->slug]) }}" class="group">
                     <div class="relative aspect-[2/3] rounded overflow-hidden bg-gray-800">
                         @if($movie->poster)
                         <img src="{{ $movie->poster_url ?? $movie->poster }}" alt="{{ $movie->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">

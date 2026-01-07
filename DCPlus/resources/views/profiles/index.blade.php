@@ -13,8 +13,8 @@
     <div class="min-h-screen bg-[#1a1a1a] flex items-center justify-center py-12">
         <div class="max-w-6xl mx-auto px-8 text-center">
             <h1 class="text-6xl md:text-7xl font-bold mb-12 text-white">Qui est-ce ?</h1>
-            
-            @if($profiles->count() > 0)
+
+            @if($profiles->count())
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-8">
                 @foreach($profiles as $profile)
                 <form action="{{ route('profiles.switch', $profile) }}" method="POST" class="group">
@@ -38,7 +38,7 @@
                     </button>
                 </form>
                 @endforeach
-                
+
                 @if($profiles->count() < 5)
                 <a href="{{ route('profiles.create') }}" class="group">
                     <div class="flex flex-col items-center">

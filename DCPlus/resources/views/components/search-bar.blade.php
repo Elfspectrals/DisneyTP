@@ -1,5 +1,5 @@
 <!-- Search bar component -->
-<form method="GET" action="{{ route('catalog') }}" class="relative">
+<form method="GET" action="{{ route('search') }}" class="relative">
     <input
         type="text"
         name="search"

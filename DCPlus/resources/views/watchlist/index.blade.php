@@ -2,8 +2,8 @@
     <div class="min-h-screen bg-[#1a1a1a]">
         <div class="max-w-7xl mx-auto px-8 py-12">
             <h1 class="text-4xl font-bold text-white mb-8">Ma liste</h1>
-            
-            @if($watchlists->count() > 0)
+
+            @if($watchlists->count())
             <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                 @foreach($watchlists as $watchlist)
                 <div class="group flex-shrink-0">
@@ -46,7 +46,7 @@
             @endif
         </div>
     </div>
-    
+
     <style>
         .scrollbar-hide {
             -ms-overflow-style: none;
